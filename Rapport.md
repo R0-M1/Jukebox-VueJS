@@ -2,14 +2,14 @@
 
 ## Binôme
 - Aillaud Romain
-- Nom Prénom
+- da Conceição André
 
 ## Choix de conception et de réalisation
 
-recommandation : utiliser mozilla firefox pour un meilleur rendu graphique
+Recommandation : utiliser mozilla firefox pour un meilleur rendu graphique
 
 ## Difficultés rencontrées (optionnel)
 
 ## Extensions réalisées (optionnel)
 
-les musiques ajoutées par URL sont conservées après chaque rechargement.
+Les musiques ajoutées par URL sont conservées après chaque rechargement.
