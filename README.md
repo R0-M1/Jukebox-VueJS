@@ -112,8 +112,3 @@ Cette extension nécessite l'utilisation de l'API de navigation de Vue Router.
 * [Vue Router](https://router.vuejs.org/) (pour l'extension de plusieurs listes de lecture)
 
 
-
-
-
-
-

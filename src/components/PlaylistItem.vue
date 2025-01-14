@@ -1,7 +1,8 @@
 <script setup>
 const props = defineProps({
   titre: String,
-  index: Number
+  index: Number,
+  error: Boolean
 })
 
 const emit = defineEmits(['remove', 'play']);
@@ -17,7 +18,7 @@ function playMusic() {
 </script>
 
 <template>
-  <li class="playlist-item">
+  <li class="playlist-item" :class="{'error': props.error}">
     <div class="titre">{{ props.titre }}</div>
     <div>
       <button class="button" @click="playMusic">
@@ -37,8 +38,28 @@ function playMusic() {
 </template>
 
 <style scoped>
+li {
+  border-radius: 6px;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 30px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
 li:hover {
   background-color: #393939;
+}
+
+li.error {
+  background-color: #d32f2f;
+}
+
+li.error:hover {
+  background-color: #f44336;
 }
 
 .titre {

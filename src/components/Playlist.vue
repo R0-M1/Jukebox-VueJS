@@ -1,25 +1,30 @@
 <script setup>
 import PlaylistItem from "./PlaylistItem.vue";
-import {ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import AddMusicForm from "./AddMusicForm.vue";
 
 let playlist = ref([]);
 let currentIndex = 0;
 const props = defineProps({
-  next: Array
+  next: Array,
+  error: Boolean
 })
 const emit = defineEmits(['item']);
 
-playlist.value.push({
-  titre: "1er",
-  src: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
-})
-playlist.value.push({
-  titre: "2eme",
-  src: "http://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3"
-})
+// extension
+onMounted(() => {
+  const storedPlaylist = localStorage.getItem("playlist");
+  if (storedPlaylist) {
+    playlist.value = JSON.parse(storedPlaylist);
+  }
+});
 
 watch(() => props.next[0], () => {
+  if(props.error) {
+    playlist.value[currentIndex].error = true;
+    // extension
+    localStorage.setItem("playlist", JSON.stringify(playlist.value));
+  }
   if (playlist.value.length - 1 === currentIndex) {
     if (props.next[1]) {
       currentIndex = 0;
@@ -37,16 +42,23 @@ watch(() => props.next[0], () => {
   }
 });
 
-function addMusic(item) {
-  console.log('test')
+function addMusic(item, type) {
   playlist.value.push({
     titre: item.titre,
     src: item.src
   });
+
+  // extension pour conserver les URLs après rechargement de la page
+  if(type==="url") {
+    localStorage.setItem("playlist", JSON.stringify(playlist.value));
+  }
 }
 
 function removeMusic(index) {
   playlist.value.splice(index, 1);
+
+  // extension
+  localStorage.setItem("playlist", JSON.stringify(playlist.value));
 }
 function playMusic(index) {
   emit("item", {
@@ -59,16 +71,17 @@ function playMusic(index) {
 
 <template>
   <AddMusicForm @add="addMusic" />
+  <div class="playlist-header">
+    <h2>Titre</h2>
+  </div>
   <ol>
-    <li>
-      <h1>Titre</h1>
-    </li>
     <PlaylistItem
         v-for="(item,index) in playlist"
         :titre="item.titre"
         :index="index"
         @remove="removeMusic"
         @play="playMusic"
+        :error="item.error"
     />
   </ol>
 </template>
@@ -79,17 +92,18 @@ ol {
   flex-direction: column;
   left: 0;
   right: 0;
+  margin: 0;
   padding: 0;
 }
 
-li {
+.playlist-header {
   height: 40px;
   display: flex;
   flex-direction: row;
   align-items: center;
   border-bottom: 1px solid white;
   justify-content: space-between;
-  padding-inline: 30px;
+  padding-inline: 25px;
   padding-top: 3px;
   padding-bottom: 3px;
   color: #9a9a9a;

@@ -19,7 +19,8 @@ watch(() => props.load, () => {
 
 const currentTime = ref(0);
 const duration = ref(0);
-let audio = ref(null);
+const volume = ref(1);
+const audio = ref(null);
 audio.value = undefined;
 
 const currentState = ref("aucun");
@@ -45,6 +46,7 @@ function handlePlayClick() {
     play();
   }
 }
+
 function play() {
   const buttonPath = document.querySelector('.play-button');
   const svgPath = buttonPath.querySelector('.play-icon path');
@@ -80,18 +82,22 @@ function updateProgress() {
   currentTime.value = Math.floor(audio.value.currentTime);
 }
 
-function getProgress() {
+function setProgress() {
   audio.value.currentTime = currentTime.value;
 }
 
 function onLoaded() {
   duration.value = audio.value.duration;
-
+  volume.value = audio.value.volume;
 }
 
 function onEnded() {
   pause();
   emit("ended", currentState.value);
+}
+
+function handleError() {
+  emit("ended", currentState.value, "error");
 }
 
 function formatTime(time) {
@@ -100,14 +106,17 @@ function formatTime(time) {
   return `${minutes}:${secondes}`;
 }
 
+function setVolume() {
+  audio.value.volume = volume.value;
+}
 </script>
 
 <template>
   <footer>
-    <audio ref="audio" @loadeddata="onLoaded" @timeupdate="updateProgress" @ended="onEnded">
+    <audio ref="audio" @loadeddata="onLoaded" @timeupdate="updateProgress" @ended="onEnded" @error="handleError">
       <source :src="srcAudio" type="audio/mpeg">
     </audio>
-    <div class="audio-titre"><h3>{{titre}}</h3></div>
+    <div class="audio-titre"><h3>{{ titre }}</h3></div>
     <div class="audio-controls">
       <div class="audio-buttons">
         <button class="play-button" @click="handlePlayClick" value="pause">
@@ -128,9 +137,17 @@ function formatTime(time) {
       </div>
       <div class="audio-progress">
         <span>{{ formatTime(currentTime) }}</span>
-        <input type="range" id="progress-bar" v-model="currentTime" @input="getProgress" step="0.1" :max="duration"/>
+        <input type="range" id="progress-bar" v-model="currentTime" @input="setProgress" step="0.1" :max="duration"/>
         <span>{{ formatTime(duration) }}</span>
       </div>
+    </div>
+    <div class="audio-volume">
+      <svg class="volume-icon" viewBox="0 0 16 16">
+        <path
+            d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 4.29V5.56a2.75 2.75 0 0 1 0 4.88z"></path>
+        <path d="M11.5 13.614a5.752 5.752 0 0 0 0-11.228v1.55a4.252 4.252 0 0 1 0 8.127v1.55z"></path>
+      </svg>
+      <input type="range" v-model="volume" @input="setVolume" step="0.01" max="1"/>
     </div>
   </footer>
 </template>
@@ -193,6 +210,7 @@ input[type="range"] {
   cursor: pointer;
 }
 
+/* fonctionne seulement pour mozilla firefox */
 input[type="range"]::-moz-range-progress {
   height: 8px;
   background-color: #ffffff;
@@ -230,6 +248,11 @@ input[type="range"]:hover::-moz-range-thumb {
   transform: scale(1.1);
 }
 
+.play-button:active {
+  background-color: #c7c7c7;
+  transform: none;
+}
+
 .play-icon {
   width: 16px;
   height: 16px;
@@ -252,8 +275,7 @@ input[type="range"]:hover::-moz-range-thumb {
 .repeat-button:hover {
   .repeat-icon {
     fill: white;
-  }
-;
+  };
   transform: scale(1.1);
 }
 
@@ -262,5 +284,18 @@ input[type="range"]:hover::-moz-range-thumb {
   height: 16px;
   fill: #f0f0f0;
 }
-</style>
 
+.audio-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  right: 40px;
+}
+
+.volume-icon {
+  height: 25px;
+  width: 25px;
+  fill: #b3b3b3;
+}
+</style>
