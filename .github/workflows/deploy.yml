@@ -19,9 +19,6 @@ jobs:
 
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
-      
-      - name: Install
-        uses: npm install
 
       - name: Build project
         run: npm run build
